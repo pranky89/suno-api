@@ -23,12 +23,15 @@ async def fetch(url, headers=None, data=None, method="POST"):
 
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.request(
-                method=method, url=url, data=data, headers=headers
-            ) as resp:
-                return await resp.json()
+            async with session.request(method=method, url=url, data=data, headers=headers) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                else:
+                    # Log the detailed response in case of error
+                    error_detail = await resp.text()
+                    raise Exception(f"HTTP Error: {resp.status}, URL: {url}, Detail: {error_detail}")
         except Exception as e:
-            raise Exception(resp.text)
+            raise e
 
 
 async def get_feed(ids, token):
